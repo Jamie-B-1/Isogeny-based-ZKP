@@ -55,25 +55,28 @@ def isogeny_walk():
     return
 
 
-# create a supersingular elliptic curve
+# create a supersingular elliptic starting curve
 def create_curve(l_a, e_a, l_b, e_b, cofactor):
     # prime number of form: p = l_a^e_a * l_b^e_b * cofactor - 1
     p = pari(l_a ** e_a * l_b ** e_b * cofactor - 1)
+
+    # polynomial x^2 + 1, for the field GF(p^2)
+    fp = pari(f"ffinit({p}, 2)")
     # generator of the field GF(p^2)
-    gen_fp2 = pari(f"ffgen(ffinit({p}, 2), 'i)")
-    x = gen_fp2
-    # supersingular elliptic curve
-    elli_curve = pari(f"ellinit([{x}, 0])")
-    # initialise base points
-    # P_a = pari(f"ellmul({l_a ** e_a}, elli_curve, {x})")
-    # Q_a = pari(f"ellmul({l_a ** (e_a - 1)}, P_a, {x})")
-    # P_b = pari(f"ellmul({l_b ** e_b}, elli_curve, {x})")
-    # Q_b = pari(f"ellmul({l_b ** (e_b - 1)}, P_b), {x})")
+    gen_fp2 = pari(f"ffgen({fp}, 't)")
+
+    # supersingular elliptic curve initialisation
+    elli_curve = pari.ellinit([1, 0], gen_fp2)
+    # check if elli_curve is a supersingular elliptic curve at p
+    if pari.ellissupersingular(elli_curve, p) == 0:
+        print("Curve is not supersingular")
+        return
+    print(f"j-invariant: {str(elli_curve.j())}")
 
     return CurveStruct(l_a, e_a, l_b, e_b, cofactor, p, gen_fp2, elli_curve, None, None, None, None)
 
 
 # create a supersingular elliptic curve
-curve = create_curve(2, 4, 3, 3, 1)
+curve = create_curve(2, 216, 3, 137, 1)
 curve.__str__()
 print(curve)
