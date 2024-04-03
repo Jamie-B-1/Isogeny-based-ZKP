@@ -11,7 +11,7 @@ pari = cypari.pari
 class CurveStruct:
 
     # initialise the curve structure
-    def __init__(self, l_a, e_a, l_b, e_b, cofactor, p, gen_fp2, elli_curve, P_a, Q_a, P_b, Q_b):
+    def __init__(self, l_a, e_a, l_b, e_b, cofactor, p, gen_fp2, elli_curve, P_1, Q_1, P_2, Q_2):
         # l_a: small prime, e_a: exponent
         self.l_a, self.e_a = l_a, e_a
         # l_b: small prime, e_b: exponent
@@ -25,11 +25,11 @@ class CurveStruct:
         # supersingular elliptic curve
         self.elli_curve = elli_curve
         # points to generate E[l_a^e_a]
-        self.P_a = P_a
-        self.Q_a = Q_a
+        self.P_1 = P_1
+        self.Q_1 = Q_1
         # points to generate E[l_b^e_b]
-        self.P_b = P_b
-        self.Q_b = Q_b
+        self.P_2 = P_2
+        self.Q_2 = Q_2
 
     # print the curve structure
     def __str__(self):
@@ -39,15 +39,15 @@ class CurveStruct:
                 f"p: {self.p}\n" \
                 f"gen_fp2: {self.gen_fp2}\n" \
                 f"elli_curve: {self.elli_curve}\n" \
-                f"P_a: {self.P_a}\n" \
-                f"Q_a: {self.Q_a}\n" \
-                f"P_b: {self.P_b}\n" \
-                f"Q_b: {self.Q_b}\n"
+                f"P_a: {self.P_1}\n" \
+                f"Q_a: {self.Q_1}\n" \
+                f"P_b: {self.P_2}\n" \
+                f"Q_b: {self.Q_2}\n"
 
 
-# generate random base points for a and b
-def generate_base_points():
-    return
+def generate_base_points(elli_curve):
+    P, Q = pari.ellgenerators(elli_curve)
+    return P, Q
 
 
 # walk through the steps of the isogeny
@@ -72,11 +72,15 @@ def create_curve(l_a, e_a, l_b, e_b, cofactor):
         print("Curve is not supersingular")
         return
     print(f"j-invariant: {str(elli_curve.j())}")
-
-    return CurveStruct(l_a, e_a, l_b, e_b, cofactor, p, gen_fp2, elli_curve, None, None, None, None)
+    bases = generate_base_points(elli_curve)
+    P_1 = bases[0][0]
+    Q_1 = bases[0][1]
+    P_2 = bases[1][0]
+    Q_2 = bases[1][1]
+    return CurveStruct(l_a, e_a, l_b, e_b, cofactor, p, gen_fp2, elli_curve, P_1, Q_1, P_2, Q_2)
 
 
 # create a supersingular elliptic curve
-curve = create_curve(2, 216, 3, 137, 1)
+curve = create_curve(2, 4, 3, 3, 1)
 curve.__str__()
 print(curve)
