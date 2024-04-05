@@ -17,14 +17,6 @@ def generate_base_points(elli_curve):
     return P_a, Q_a, P_b, Q_b
 
 
-# create a dict to store base points and primes for A and B
-def create_params(elli_curve, l_a, e_a, l_b, e_b):
-    P_a, Q_a, P_b, Q_b = generate_base_points(elli_curve)
-    params = {"A": [P_a, Q_a, l_a, e_a],
-              "B": [P_b, Q_b, l_b, e_b]}
-    return params
-
-
 # create a supersingular elliptic starting curve
 def create_curve(l_a, e_a, l_b, e_b, cofactor):
     # prime number of form: p = l_a^e_a * l_b^e_b * cofactor - 1
@@ -39,9 +31,7 @@ def create_curve(l_a, e_a, l_b, e_b, cofactor):
     elli_curve = pari.ellinit([1, 0], gen_fp2)
     # check if elli_curve is a supersingular elliptic curve at p
     if pari.ellissupersingular(elli_curve, p) == 0:
-        print("Curve is not supersingular")
-        return
-    print(f"j-invariant: {str(elli_curve.j())}")
+        raise ValueError("Curve is not supersingular")
 
     P_a, Q_a, P_b, Q_b = generate_base_points(elli_curve)
 
@@ -86,6 +76,6 @@ class CurveStruct:
 
 
 # create a supersingular elliptic curve
-curve = create_curve(2, 4, 3, 3, 1)
-curve.__str__()
-print(curve)
+# curve = create_curve(2, 4, 3, 3, 1)
+# curve.__str__()
+# print(curve)
