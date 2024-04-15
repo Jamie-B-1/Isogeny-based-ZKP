@@ -1,5 +1,5 @@
 import random
-import curve
+from isogeny_curve import curve
 import cypari
 pari = cypari.pari
 
@@ -28,8 +28,8 @@ def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None):
             P_prime = pari.ellisogenyapply(ff_prime, P_prime)
             Q_prime = pari.ellisogenyapply(ff_prime, Q_prime)
     if P_prime is not None and Q_prime is not None:
-        return E, P_prime, Q_prime
-    return E
+        return E, S, P_prime, Q_prime
+    return E, S
 
 
 
@@ -53,7 +53,10 @@ class SIDH:
     def __str__(self):
         return f"l: {self.l}, e: {self.e}\n" \
                 f"P: {self.P}\n" \
-                f"Q: {self.Q}\n"
+                f"Q: {self.Q}\n" \
+                f"s_key: {self.s_key}\n" \
+                f"S: {self.S}\n" \
+                f"pub_key: {self.pub_key}\n"
 
     def get_other_agent(self):
         if self.agent == "A":
@@ -77,7 +80,7 @@ class SIDH:
         return shared_curve.j()
 
 
-c = curve.create_curve(2, 216, 3, 137, 1)
+c = curve.create_curve(2, 4, 3, 3, 1)
 # print(c.__str__())
 params = create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
 # k = random.randint(0, c.l_b ** c.e_b)
@@ -85,12 +88,12 @@ params = create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
 # R = pari.elladd(c.elli_curve, c.P_b, r)
 # iso = isogeny_walk(c.elli_curve, R, c.l_b, c.e_b, c.P_a, c.Q_a)
 # print(iso[0].j())
-A = SIDH("A")
-B = SIDH("B")
-secretA = A.shared_secret(B)
-secretB = B.shared_secret(A)
-if secretA == secretB:
-    print("Shared secret is the same")
+# A = SIDH("A")
+# B = SIDH("B")
+# secretA = A.shared_secret(B)
+# secretB = B.shared_secret(A)
+# if secretA == secretB:
+#     print("Shared secret is the same")
 # print(sidh.__str__())
 
 
