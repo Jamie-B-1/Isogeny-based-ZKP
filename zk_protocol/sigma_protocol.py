@@ -7,7 +7,8 @@ pari = cypari.pari
 
 
 # prover commitment
-def commitment(c):
+def prover(c, chal):
+    # commitment ############################################################
     A = sidh.SIDH("A")
     B = sidh.SIDH("B")
     secretA = A.shared_secret(B)
@@ -36,28 +37,27 @@ def commitment(c):
     com_R = utility.hash_commitment(com_3, r_R)
     com_prime = utility.hash_commitment((d, e), r)
     com = (com_L, com_R, com_prime)
-    return com
+
+    # response ############################################################
+    if chal == 1:
+        z = random.randint(0, c.l_a**(c.e_a-1))
+        k_phi_prime = pari.ellmul(B.pub_key[0], B.pub_key[1], z)
+        resp = (com_L, r_L, k_phi_prime, com_R, r_R)
+        return com, resp
+    else:
+        if chal == 0:
+            resp = (com_R, r_R, d, e, r)
+            return resp
+        else:
+            resp = (com_L, r_L, d, e, r)
+            return resp
 
 
 def challenge():
-    return random.randint(0, 1)
+    return random.choice([-1, 0, 1])
 
 
-def response(com, chal):
-    if chal == 1:
-        return True
-    else:
-        print("Curve: ", com[0])
-        [L, M] = pari.ellisomat(com.E_2)
-        index = 0
-        for i, (curve_i, _, _) in enumerate(L):
-            if curve_i == curve:
-                index = i
-        dual_isogeny = L[index][1]
-        return dual_isogeny
-
-
-def verify(com, chal, res):
+def verify(p, chal):
     if chal == 1:
         return
     else:
@@ -65,12 +65,11 @@ def verify(com, chal, res):
 
 
 
-# def sigma_protocol():
-#     com = commitment()
-#     chal = challenge()
-#     res = response(com, chal)
-#     print(res)
-#     return res
+def sigma_protocol():
+    chal = challenge()
+    p = prover(c, chal)
+    verify(p, chal)
+    return p
 
 c = sidh.c
 print("curve E0: ", c.__str__(), "\n-------------------")
@@ -81,6 +80,6 @@ params = sidh.params
 # secretB = B.shared_secret(A)
 # if secretA == secretB:
 #     print("Shared secret is the same")
-print(commitment(c))
-# print(sigma_protocol())
+# print(commitment(c))
+print(sigma_protocol())
 print("-------------------")
