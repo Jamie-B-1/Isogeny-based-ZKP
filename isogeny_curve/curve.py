@@ -8,7 +8,7 @@ import cypari
 pari = cypari.pari
 
 
-def get_random_point(elli_curve, l, e, P, Q):
+def get_random_point(elli_curve, l, e, P, Q, rand_sample=False):
     # while True:
     # sample a random l-torsion point multiplied by l: [2m']
     m = l * random.randint(0, l ** (e - 1) - 1)
@@ -16,6 +16,8 @@ def get_random_point(elli_curve, l, e, P, Q):
     s_mul = pari.ellmul(elli_curve, Q, m)
     # R = P + [2m']Q
     R = pari.elladd(elli_curve, P, s_mul)
+    if rand_sample:
+        return R, m
     return R
 
 def random_bases(elli_curve, l, e, P, Q):
@@ -24,7 +26,7 @@ def random_bases(elli_curve, l, e, P, Q):
         Q = get_random_point(elli_curve, l, e, P, Q)
         order_P = pari.ellorder(elli_curve, P)
         order_Q = pari.ellorder(elli_curve, Q)
-        if order_P % e == 0 and order_Q % e == 0:
+        if order_P % l**e == 0 and order_Q % l**e == 0:
             return P, Q
 
 
@@ -32,6 +34,7 @@ def generate_base_points(gen_fp2, elli_curve, l_a, e_a, l_b, e_b):
     t = gen_fp2
 
     P_a = [111 + 311 * t, 247 + 162 * t]  # SIDH parameters for l=2,3 e=4,3
+    print("order of P_a for E0: ", pari.ellorder(elli_curve, P_a))
     Q_a = [290 + 176 * t, 29 + 421 * t]
     P_b = [360 + 112 * t, 287 + 146 * t]
     Q_b = [347 + 404 * t, 68 + 176 * t]

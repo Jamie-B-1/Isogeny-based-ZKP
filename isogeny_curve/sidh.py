@@ -11,8 +11,17 @@ def create_params(l_a, e_a, l_b, e_b, P_a, Q_a, P_b, Q_b):
     return param_dict
 
 
+# def dual_isogeny(E, kernel, l , e, P, Q):
+#     ff = c.gen_fp2
+#     point = curve.get_random_point(E, l, e, P, Q)
+#     kernel_point, ff_prime = pari.ellisogeny(E, kernel)
+#     E = pari.ellinit(kernel_point, ff)
+#     dual_iso = pari.ellisogenyapply(ff_prime, point)
+#     return E
+
+
 # compute an isogeny from base curve to E_prime (E -> E')
-def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None):
+def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None, compute_dual=False):
     # finite field from base curve
     ff = c.gen_fp2
     for i in range(e):
@@ -27,9 +36,19 @@ def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None):
         if P_prime is not None and Q_prime is not None:
             P_prime = pari.ellisogenyapply(ff_prime, P_prime)
             Q_prime = pari.ellisogenyapply(ff_prime, Q_prime)
+        if compute_dual:
+            dual_iso = pari.ellisogeny(E_prime, S)
+            dual_rand = curve.get_random_point(E_prime, l, e, P_prime, Q_prime)
+            kernel = pari.ellisogenyapply(dual_iso[1], dual_rand)
     if P_prime is not None and Q_prime is not None:
-        return E, S, P_prime, Q_prime
-    return E, S
+        if compute_dual:
+            return E, S, P_prime, Q_prime, dual_iso
+        else:
+            return E, S, P_prime, Q_prime
+    if compute_dual:
+        return E, S, dual_iso
+    else:
+        return E, S
 
 
 
@@ -75,9 +94,9 @@ class SIDH:
         S = pari.elladd(other.pub_key[0], other.pub_key[1], mul)
         # compute the isogeny walk E_a -> E_ab, E_b -> E_ba
         shared_curve = isogeny_walk(other.pub_key[0], S, self.l, self.e)
-        print(shared_curve.j())
+        # print(shared_curve.j())
         # return the j-invariant of the shared curve: shared secret
-        return shared_curve.j()
+        return shared_curve
 
 
 c = curve.create_curve(2, 4, 3, 3, 1)
