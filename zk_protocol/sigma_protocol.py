@@ -9,10 +9,10 @@ pari = cypari.pari
 # prover commitment
 def prover(c, chal):
     # commitment ############################################################
-    A = sidh.SIDH("A")
-    B = sidh.SIDH("B")
-    secretA = A.shared_secret(B)
-    secretB = B.shared_secret(A)
+    # A = sidh.SIDH("A")
+    # B = sidh.SIDH("B")
+    # secretA = A.shared_secret(B)
+    # secretB = B.shared_secret(A)
 
     P_2, Q_2 = curve.random_bases(B.pub_key[0], c.l_b, c.e_b, c.P_b, c.Q_b)
     mul = pari.ellmul(A.pub_key[0], A.pub_key[2], B.s_key)
@@ -41,7 +41,8 @@ def prover(c, chal):
     # response ############################################################
     if chal == 1:
         z = random.randint(0, c.l_a**(c.e_a-1))
-        k_phi_prime = pari.ellmul(B.pub_key[0], B.pub_key[1], z)
+        print(secretB)
+        k_phi_prime = pari.ellmul(secretB[0], secretB[1], z)
         resp = (com_L, r_L, k_phi_prime, com_R, r_R)
         return com, resp
     else:
@@ -58,8 +59,9 @@ def challenge():
 
 
 def verify(p, chal):
+    com = p
     if chal == 1:
-        return
+        print("commitment and response: ", com)
     else:
         return
 
@@ -74,12 +76,12 @@ def sigma_protocol():
 c = sidh.c
 print("curve E0: ", c.__str__(), "\n-------------------")
 params = sidh.params
-# A = sidh.SIDH("A")
-# B = sidh.SIDH("B")
-# secretA = A.shared_secret(B)
-# secretB = B.shared_secret(A)
-# if secretA == secretB:
-#     print("Shared secret is the same")
+A = sidh.SIDH("A")
+B = sidh.SIDH("B")
+secretA = A.shared_secret(B)
+secretB = B.shared_secret(A)
+if secretA == secretB:
+    print("Shared secret is the same")
 # print(commitment(c))
 print(sigma_protocol())
 print("-------------------")
