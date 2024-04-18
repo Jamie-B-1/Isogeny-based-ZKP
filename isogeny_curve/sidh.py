@@ -1,4 +1,4 @@
-import random
+import secrets
 from isogeny_curve import curve
 import cypari
 pari = cypari.pari
@@ -60,7 +60,7 @@ class SIDH:
         self.P = params[agent][2]
         self.Q = params[agent][3]
         # sample a random l-torsion point multiplied by l: [2m']
-        self.s_key = self.l * random.randint(0, self.l ** (self.e-1) - 1)
+        self.s_key = self.l * secrets.randbelow(self.l ** (self.e-1))
         # Generator for a secret S : self.S = self.P + self.s_key * self.Q
         # point addition and multiplication to generate S above
         s_mul = pari.ellmul(c.elli_curve, self.Q, self.s_key)

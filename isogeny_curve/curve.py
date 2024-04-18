@@ -2,7 +2,7 @@
 # methods for elliptic curve isogenies are on page 97 of the docs
 # cypari works on Windows and cypari2 works on linux
 # https://cypari2.readthedocs.io/_/downloads/en/latest/pdf/
-import random
+import secrets
 import cypari
 # initialise pari variable
 pari = cypari.pari
@@ -11,7 +11,7 @@ pari = cypari.pari
 def get_random_point(elli_curve, l, e, P, Q, rand_sample=False):
     # while True:
     # sample a random l-torsion point multiplied by l: [2m']
-    m = l * random.randint(0, l ** (e - 1) - 1)
+    m = l * secrets.randbelow(l ** (e - 1))
     # point addition and multiplication to generate R
     s_mul = pari.ellmul(elli_curve, Q, m)
     # R = P + [2m']Q

@@ -1,7 +1,7 @@
 from isogeny_curve import sidh
 from isogeny_curve import curve
 import utility
-import random
+import secrets
 import cypari
 pari = cypari.pari
 
@@ -55,7 +55,7 @@ def prover(c, chal):
 
 
 def challenge():
-    return random.choice([-1, 0, 1])
+    return secrets.choice([-1, 0, 1])
 
 
 def verify(p, chal):
