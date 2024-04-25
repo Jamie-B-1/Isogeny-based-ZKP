@@ -1,4 +1,4 @@
-import secrets
+import random
 from isogeny_curve import curve
 import cypari
 pari = cypari.pari
@@ -11,17 +11,8 @@ def create_params(l_a, e_a, l_b, e_b, P_a, Q_a, P_b, Q_b):
     return param_dict
 
 
-# def dual_isogeny(E, kernel, l , e, P, Q):
-#     ff = c.gen_fp2
-#     point = curve.get_random_point(E, l, e, P, Q)
-#     kernel_point, ff_prime = pari.ellisogeny(E, kernel)
-#     E = pari.ellinit(kernel_point, ff)
-#     dual_iso = pari.ellisogenyapply(ff_prime, point)
-#     return E
-
-
 # compute an isogeny from base curve to E_prime (E -> E')
-def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None, compute_dual=False):
+def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None):
     # finite field from base curve
     ff = c.gen_fp2
     for i in range(e):
@@ -36,19 +27,9 @@ def isogeny_walk(E, S, l, e, P_prime=None, Q_prime=None, compute_dual=False):
         if P_prime is not None and Q_prime is not None:
             P_prime = pari.ellisogenyapply(ff_prime, P_prime)
             Q_prime = pari.ellisogenyapply(ff_prime, Q_prime)
-        if compute_dual:
-            dual_iso = pari.ellisogeny(E_prime, S)
-            dual_rand = curve.get_random_point(E_prime, l, e, P_prime, Q_prime)
-            kernel = pari.ellisogenyapply(dual_iso[1], dual_rand)
     if P_prime is not None and Q_prime is not None:
-        if compute_dual:
-            return E, S, P_prime, Q_prime, dual_iso
-        else:
-            return E, S, P_prime, Q_prime
-    if compute_dual:
-        return E, S, dual_iso
-    else:
-        return E, S
+        return E, P_prime, Q_prime, ff_prime, R
+    return E, ff_prime, R
 
 
 
@@ -60,7 +41,7 @@ class SIDH:
         self.P = params[agent][2]
         self.Q = params[agent][3]
         # sample a random l-torsion point multiplied by l: [2m']
-        self.s_key = self.l * secrets.randbelow(self.l ** (self.e-1))
+        self.s_key = self.l * random.randint(0, self.l ** (self.e-1)-1)
         # Generator for a secret S : self.S = self.P + self.s_key * self.Q
         # point addition and multiplication to generate S above
         s_mul = pari.ellmul(c.elli_curve, self.Q, self.s_key)
@@ -96,23 +77,12 @@ class SIDH:
         shared_curve = isogeny_walk(other.pub_key[0], S, self.l, self.e)
         # print(shared_curve.j())
         # return the j-invariant of the shared curve: shared secret
-        return shared_curve
+        return shared_curve, S
 
 
-c = curve.create_curve(2, 4, 3, 3, 1)
+c = curve.create_curve(2, 216, 3, 137, 1)
 # print(c.__str__())
 params = create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
-# k = random.randint(0, c.l_b ** c.e_b)
-# r = pari.ellmul(c.elli_curve, c.Q_b, k)                           # calculating random point for an isogeny E -> E/<R>
-# R = pari.elladd(c.elli_curve, c.P_b, r)
-# iso = isogeny_walk(c.elli_curve, R, c.l_b, c.e_b, c.P_a, c.Q_a)
-# print(iso[0].j())
-# A = SIDH("A")
-# B = SIDH("B")
-# secretA = A.shared_secret(B)
-# secretB = B.shared_secret(A)
-# if secretA == secretB:
-#     print("Shared secret is the same")
 # print(sidh.__str__())
 
 
