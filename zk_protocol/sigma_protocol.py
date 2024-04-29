@@ -8,12 +8,12 @@ pari = cypari.pari
 
 
 # prover commitment
-def prover(c, chal):
+def prover(c, params, chal):
     # commitment ############################################################
-    A = sidh.SIDH("A")
-    B = sidh.SIDH("B")
-    secretA = A.shared_secret(B)
-    secretB = B.shared_secret(A)
+    A = sidh.SIDH("A", c.elli_curve, params, c)
+    B = sidh.SIDH("B", c.elli_curve, params, c)
+    secretA = A.shared_secret(B, c)
+    secretB = B.shared_secret(A, c)
 
     P_2, Q_2 = curve.random_bases(B.pub_key[0], c.l_b, c.e_b, c.P_b, c.Q_b)
     P_3, Q_3 = pari.ellisogenyapply(secretA[0][1], P_2), pari.ellisogenyapply(secretA[0][1], Q_2)
@@ -29,9 +29,9 @@ def prover(c, chal):
     kernel_point_E_3_E_1 = curve.get_random_point(secretB[0][0], c.l_b, c.e_b, P_3, Q_3, rand_sample=True)
     e = kernel_point_E_3_E_1[1]
 
-    r_L = utility.generate_random_binary_string(256)
-    r_R = utility.generate_random_binary_string(256)
-    r = utility.generate_random_binary_string(256)
+    r_L = utility.generate_random_binary_string(2*256)
+    r_R = utility.generate_random_binary_string(2*256)
+    r = utility.generate_random_binary_string(2*256)
 
     com_2 = (B.pub_key[0], P_2, Q_2)
     com_3 = (secretB[0][0], P_3, Q_3)
@@ -67,7 +67,7 @@ def challenge():
     return secrets.choice([-1, 0, 1])
 
 
-def verify(p, chal):
+def verify(c, p, chal):
     com = p[0]
     print("Verifying based on challenge:", chal)
 
@@ -78,7 +78,7 @@ def verify(p, chal):
         if utility.hash_commitment(com_2, resp[1]) != (com[0]) or \
                 utility.hash_commitment(com_3, resp[4]) != (com[1]):
             return False
-        E_2_E_3 = sidh.isogeny_walk(com_2[0], resp[2], c.l_a, c.e_a)
+        E_2_E_3 = sidh.isogeny_walk(com_2[0], resp[2], c.l_a, c.e_a, c)
         if E_2_E_3[0].j() == com_3[0].j():
             if com_3[1] == pari.ellisogenyapply(E_2_E_3[1], com_2[1]) and \
                     com_3[2] == pari.ellisogenyapply(E_2_E_3[1], com_2[2]):
@@ -86,45 +86,56 @@ def verify(p, chal):
             else:
                 return False
 
-    elif chal == 0:
-        resp = p[1]
-        com_3 = p[1][0]
-        if utility.hash_commitment(com_3, resp[1]) != (com[1]) or \
-                utility.hash_commitment((resp[2], resp[3]), resp[4]) != (com[2]):
-            print("response rejected: ", com)
+    else:
+        if chal == 0:
+            resp = p[1]
+            com_3 = p[1][0]
+            if utility.hash_commitment(com_3, resp[1]) != (com[1]) or \
+                    utility.hash_commitment((resp[2], resp[3]), resp[4]) != (com[2]):
+                print("response rejected: ", com)
+                return False
+            # calculate dual kernel point
+            # if statement to check if calculated secret curve is equal to the curve sent by the prover
             return False
-        # calculate dual kernel point
-        # if statement to check if calculated secret curve is equal to the curve sent by the prover
-        return False
 
-    elif chal == -1:
-        resp = p[1]
-        com_2 = p[1][0]
-        if utility.hash_commitment(com_2, resp[1]) != (com[0]) or \
-                utility.hash_commitment((resp[2], resp[3]), resp[4]) != (com[2]):
-            print("response rejected: ", com)
+        elif chal == -1:
+            resp = p[1]
+            com_2 = p[1][0]
+            if utility.hash_commitment(com_2, resp[1]) != (com[0]) or \
+                    utility.hash_commitment((resp[2], resp[3]), resp[4]) != (com[2]):
+                print("response rejected: ", com)
+                return False
+            # calculate dual kernel point
+            # check if calculated secret curve is equal to the curve sent by the prover
             return False
-        # calculate dual kernel point
-        # check if calculated secret curve is equal to the curve sent by the prover
-        return False
+        else:
+            # invalid challenge
+            return False
 
 
-def sigma_protocol():
-    for i in range(10):
-        chal = challenge()
-        #chal = 1
-        p = prover(c, chal)
-        v = verify(p, chal)
+def sigma_protocol(c, params, k):
+    for i in range(k):
+        #chal = challenge()
+        chal = 1
+        p = prover(c, params, chal)
+        v = verify(c, p, chal)
         if not v:
             return "response rejected"
     return "response accepted"
 
 
-t_0 = time.perf_counter()
-c = sidh.c
-params = sidh.params
-print("-------------------")
-print(sigma_protocol())
-t_1 = time.perf_counter()
-print("Time taken:", t_1 - t_0)
-print("-------------------")
+def main(k):
+    c = curve.create_curve(2, 216, 3, 137, 1)
+    params = sidh.create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
+    print("-------------------")
+    print(sigma_protocol(c, params, k))
+    print("-------------------")
+
+
+if __name__ == "__main__":
+    # number of iterations
+    iterations = int(input("Enter number of iterations: "))
+    t_0 = time.perf_counter()
+    main(iterations)
+    t_1 = time.perf_counter()
+    print("Time taken:", t_1 - t_0)
