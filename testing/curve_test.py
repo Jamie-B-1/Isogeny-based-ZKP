@@ -1,5 +1,7 @@
 import unittest
 from isogeny_curve import curve
+import cypari
+pari = cypari.pari
 
 class TestCurveStruct(unittest.TestCase):
     def setUp(self):
@@ -12,6 +14,7 @@ class TestCurveStruct(unittest.TestCase):
         self.assertEqual(self.curve.e_a, 4)
         self.assertEqual(self.curve.l_b, 3)
         self.assertEqual(self.curve.e_b, 3)
+        assert pari.ellissupersingular(self.curve.elli_curve) == 1
 
     def test_get_random_point(self):
         # Test get_random_point function
@@ -27,6 +30,7 @@ class TestCurveStruct(unittest.TestCase):
         P_new, Q_new = curve.random_bases(self.curve.elli_curve, self.curve.l_a, self.curve.e_a, P, Q)
         self.assertIsNotNone(P_new)
         self.assertIsNotNone(Q_new)
+        assert pari.ellmul(self.curve.elli_curve, P_new, self.curve.order) == 0
 
     def test_generate_base_points(self):
         # Test generate_base_points function
@@ -40,6 +44,7 @@ class TestCurveStruct(unittest.TestCase):
         # Test __str__ function
         curve_str = str(self.curve)
         self.assertIsInstance(curve_str, str)
+
 
 if __name__ == '__main__':
     unittest.main()
