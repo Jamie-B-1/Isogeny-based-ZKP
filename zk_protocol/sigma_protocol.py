@@ -1,6 +1,6 @@
 from isogeny_curve import sidh
 from isogeny_curve import curve
-import utility
+from zk_protocol import utility
 import secrets
 import time
 import cypari
@@ -77,6 +77,8 @@ def verify(c, p, chal):
         com_3 = p[1][3]
         if utility.hash_commitment(com_2, resp[1]) != (com[0]) or \
                 utility.hash_commitment(com_3, resp[4]) != (com[1]):
+            return False
+        if pari.ellmul(com_2[0], resp[2], c.order) != 0:
             return False
         E_2_E_3 = sidh.isogeny_walk(com_2[0], resp[2], c.l_a, c.e_a, c)
         if E_2_E_3[0].j() == com_3[0].j():

@@ -110,6 +110,7 @@ class CurveStruct:
         # points to generate E[l_b^e_b]
         self.P_b = P_b
         self.Q_b = Q_b
+        self.order = pari.ellcard(elli_curve)
 
     # print the curve structure
     def __str__(self):
