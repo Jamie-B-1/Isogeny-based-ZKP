@@ -3,7 +3,7 @@ import secrets
 
 
 def generate_random_binary_string(length):
-    return ''.join(secrets.choice('01') for _ in range(length))
+    return ''.join(str(secrets.choice('01')) for _ in range(length))
 
 
 # hash commitment concatenated with random binary string
