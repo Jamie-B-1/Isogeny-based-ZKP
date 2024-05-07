@@ -21,6 +21,7 @@ output the result of the verification process.
 
 If the verification process is successful, 
 the program will output `response accepted`, otherwise it will output `response rejected`.
+
 ---
 ## Example
 Sample output with fixed challenge of 1 and 4 iterations:
@@ -48,4 +49,5 @@ Time taken: 3.1004421999678016
 This second example shows that the verification process failed, as the response was rejected. This is because the 
 dual isogeny computation is not implemented in the current version of the program. In the cases of a challenge being 0
 or -1, the verification process will always fail due to the current decisional statement to return False.
+
 ---
