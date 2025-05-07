@@ -15,10 +15,12 @@ def create_params(l_a, e_a, l_b, e_b, P_a, Q_a, P_b, Q_b):
 def isogeny_walk(E, S, l, e, c, P_prime=None, Q_prime=None):
     # finite field from base curve
     ff = c.gen_fp2
+    iter_eval = []
     for i in range(e):
         scalar = l ** (e - i - 1)
         # compute the kernel of the isogeny
         R = pari.ellmul(E, S, scalar)
+        iter_eval.append(S)
         # new curve E' and isogeny from E to E'
         [E_prime, ff_prime] = pari.ellisogeny(E, R)
         # apply the isogeny from E to E'
@@ -28,8 +30,8 @@ def isogeny_walk(E, S, l, e, c, P_prime=None, Q_prime=None):
             P_prime = pari.ellisogenyapply(ff_prime, P_prime)
             Q_prime = pari.ellisogenyapply(ff_prime, Q_prime)
     if P_prime is not None and Q_prime is not None:
-        return E, P_prime, Q_prime, ff_prime, R
-    return E, ff_prime, R
+        return E, P_prime, Q_prime, ff_prime, iter_eval, R
+    return E, ff_prime, iter_eval, R
 
 
 
@@ -80,9 +82,11 @@ class SIDH:
         return shared_curve, S
 
 
-#c = curve.create_curve(2, 4, 3, 3, 1)
+c = curve.create_curve(2, 4, 3, 3, 1)
 # print(c.__str__())
-#params = create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
-# print(sidh.__str__())
-
+params = create_params(c.l_a, c.e_a, c.l_b, c.e_b, c.P_a, c.Q_a, c.P_b, c.Q_b)
+E1 = SIDH("A", c.elli_curve, params, c)
+E2 = SIDH("B", c.elli_curve, params, c)
+E1_E3 = E1.shared_secret(E2, c)
+E2_E3 = E2.shared_secret(E1, c)
 
