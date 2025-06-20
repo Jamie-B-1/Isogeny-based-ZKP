@@ -26,11 +26,11 @@ def sidh_ladder(h):
     sk_a = c.l_a * random.randint(0, c.l_a ** (c.e_a - 1) - 1)
     S_a = pari.elladd(E00, c.P_a, pari.ellmul(E00, c.Q_a, sk_a))
     G_i = S_a  # Alice's kernel at level 0
-    print("Initial kernel: ", G_i)
+    #print("Initial kernel: ", G_i)
     G_i_chain = [G_i]  # Alice's kernel chain
 
     for i in range(h):
-        print(f"Step {i}: constructing square isogeny...")
+        #print(f"Step {i}: constructing square isogeny...")
         E_i0 = E_chain[-1]  # current lower-left curve
         P_a = P_a_chain[-1]
         Q_a = Q_a_chain[-1]
@@ -49,7 +49,7 @@ def sidh_ladder(h):
         G_i_pushed = pari.ellisogenyapply(psi_i[1], G_i)
         # print("G_i_pushed: ", G_i_pushed)
         # Check if G_i_pushed is on E_{i+1,0}
-        print("Alice point: ", pari.ellisoncurve(E_i1, G_i_pushed))
+        #print("Alice point: ", pari.ellisoncurve(E_i1, G_i_pushed))
         # Alice’s horizontal isogeny on E_{i+1,0} using pushed kernel
         phi_i = pari.ellisogeny(E_i1, G_i_pushed)
         E_i1_top = pari.ellinit(phi_i[0], c.gen_fp2)  # E'_{i+1,0}
@@ -82,15 +82,15 @@ def sidh_ladder(h):
         E_i1_shared = pari.ellinit(phi_i_prime[0], c.gen_fp2)
 
         # check commutativity of SIDH square
-        print("E_i1: ", E_i1.j())
-        print("E_i1_top: ", E_i1_top.j())
-        print("E_i1_shared: ", E_i1_shared.j())
-        print("E_i1_top_shared: ", E_i1_top_shared.j())
-        print("shared curves?: ", E_i1_shared.j() == E_i1_top_shared.j())
+        # print("E_i1: ", E_i1.j())
+        # print("E_i1_top: ", E_i1_top.j())
+        # print("E_i1_shared: ", E_i1_shared.j())
+        # print("E_i1_top_shared: ", E_i1_top_shared.j())
+        # print("shared curves?: ", E_i1_shared.j() == E_i1_top_shared.j())
 
         # Update Alice's kernel for next square
         G_i = G_i_pushed
         S_b = S_b_top
 
-        print(f"Step {i}: square isogeny constructed.")
+        #print(f"Step {i}: square isogeny constructed.")
     return E_chain[-1], psi_i, top_chain[-1], psi_i_prime, phi_i_prime

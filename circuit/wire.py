@@ -53,14 +53,22 @@ if __name__ == "__main__":
     # Set value and commitment
     wire1.set_value(1)
     wire2.set_value(0)
+    assert wire1.value == 1
+    assert wire2.value == 0
     print("Wire 1 Value:", wire1.value)
     print("Wire 2 Value:", wire2.value)
     # Set SIDH commitment
     wire1.set_sidh_commitment(wire1.value, c, params)
     wire2.set_sidh_commitment(wire2.value, c, params)
+    assert wire1.value.bit == 1
+    assert wire2.value.bit == 0
+    assert wire1.value.verify()
+    assert wire2.value.verify()
     # Print SIDH commitments
     print("Wire 1 SIDH Commitment:", wire1.value.get_commitment()[0])
     print("Wire 2 SIDH Commitment:", wire2.value.get_commitment()[0])
     # Verify SIDH commitment
     print("Wire 1 Commitment Verification:", wire1.verify_sidh_commitment())
+    assert wire1.verify_sidh_commitment()
     print("Wire 2 Commitment Verification:", wire2.verify_sidh_commitment())
+    assert wire2.verify_sidh_commitment()

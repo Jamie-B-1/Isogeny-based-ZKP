@@ -67,7 +67,7 @@ def challenge():
 
 def verify(c, p, chal):
     com = p[0]
-    print("Verifying based on challenge:", chal)
+    # print("Verifying based on challenge:", chal)
 
     if chal == -1:
         resp = p[1]
@@ -137,7 +137,7 @@ def verify(c, p, chal):
             return 0
         E_2_E_3 = sidh.isogeny_walk(com_2[0][0], resp[2], c.l_a, c.e_a, c)
         if E_2_E_3[0].j() == com_3[0][0].j():
-            print("j-invariant: ", E_2_E_3[0].j(), "j-invariant: ", com_3[0][0].j())
+            # print("j-invariant: ", E_2_E_3[0].j(), "j-invariant: ", com_3[0][0].j())
             if com_3[1] == pari.ellisogenyapply(E_2_E_3[1], com_2[1]) and \
                     com_3[2] == pari.ellisogenyapply(E_2_E_3[1], com_2[2]):
                 return 1
